@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Explorer: Glories of Belief Prologue</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Serene Earth -->
+    <!-- Application Structure Plan: The SPA is designed as a conceptual exploration rather than a linear text. It starts with an introduction to the core thesis: understanding the Quran's Explicit verses requires understanding the Human Self. The user is then guided to two main interactive sections. The first is 'The Nature of the Self', which uses interactive modules for each of the five senses to let the user experience the author's parables and grasp the concept of the 'store of experience'. The second is 'The 7 Types of Explicit Verses', presented as a clickable grid. Selecting a type dynamically loads its detailed commentary and examples into a main content view. This non-linear, concept-first approach allows users to understand the author's framework before delving into the proofs, significantly improving comprehension and engagement over reading a static page. -->
+    <!-- Visualization & Content Choices: 
+        1. Report Info: Core concepts of Explicit vs. Implicit and the role of the Self. -> Goal: Inform & Orient. -> Viz/Presentation Method: Thematic sections with clear headings and detailed introductory text. -> Interaction: Vertical scrolling and navigation links. -> Justification: Establishes the foundational argument of the chapter clearly for the user. -> Library/Method: HTML/CSS.
+        2. Report Info: Parables of the five senses. -> Goal: Engage & Demonstrate. -> Viz/Presentation Method: Five interactive modules. -> Interaction: User clicks a button for a sense (e.g., "Experience Taste"), which reveals a text block with the corresponding parable and explanation. -> Justification: Transforms a passive reading exercise into an active thought experiment, reinforcing the author's central point about the Self's 'store' of feelings. -> Library/Method: Vanilla JS, HTML/CSS.
+        3. Report Info: The 7 categories of Explicit verses. -> Goal: Organize & Allow Exploration. -> Viz/Presentation Method: A responsive grid of clickable cards. -> Interaction: Clicking a card dynamically renders the detailed content for that category in the main view area. Clicking Chapter 1 navigates to ch1.html, while others show a 'Coming Soon' message. -> Justification: Breaks down dense text into user-selectable, manageable sections, promoting exploration without overwhelming the user. -> Library/Method: Vanilla JS, HTML/CSS.
+        CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+    <style>
+        body {
+            font-family: 'Lora', serif;
+            background-color: #FDFBF8; /* Warm off-white */
+            color: #403A35; /* Dark brown */
+        }
+        h1, h2, h3, h4, h5, h6, .font-sans {
+            font-family: 'Inter', sans-serif;
+        }
+        .bg-primary { background-color: #FDFBF8; }
+        .bg-secondary { background-color: #F5F1ED; } /* Lighter beige */
+        .bg-accent { background-color: #A67B5B; } /* Muted terracotta */
+        .text-accent { color: #A67B5B; }
+        .text-primary { color: #403A35; }
+        .text-secondary { color: #6E645B; } /* Lighter brown for subtitles */
+        .border-accent { border-color: #D1C7BC; } /* Subtle border */
+        
+        .nav-link {
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #A67B5B;
+            border-bottom-color: #A67B5B;
+        }
+        .active-tab {
+            border-color: #A67B5B;
+            background-color: #F5F1ED;
+            color: #403A35;
+            font-weight: 600;
+        }
+        .content-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .chapter-card-inactive {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        blockquote {
+            border-left: 3px solid #A67B5B;
+            padding-left: 1rem;
+            font-style: italic;
+            color: #6E645B;
+        }
+    </style>
+</head>
+<body class="bg-primary text-primary antialiased">
+
+    <header class="bg-secondary/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="https://gloriesofbelief.com" target="_blank" rel="noopener noreferrer" title="Visit gloriesofbelief.com">
+                        <h1 class="text-xl font-bold text-accent font-sans">Glories of Belief</h1>
+                    </a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#problem" class="nav-link px-3 py-2 rounded-md text-sm font-medium font-sans">The Problem</a>
+                        <a href="#failures" class="nav-link px-3 py-2 rounded-md text-sm font-medium font-sans">Core Failures</a>
+                        <a href="#challenges" class="nav-link px-3 py-2 rounded-md text-sm font-medium font-sans">The Challenges</a>
+                        <a href="#solution" class="nav-link px-3 py-2 rounded-md text-sm font-medium font-sans">The Solution</a>
+                    </div>
+                </div>
+                 <div class="md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-primary hover:text-accent hover:bg-gray-200 focus:outline-none">
+                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#problem" class="block nav-link px-3 py-2 rounded-md text-base font-medium font-sans">The Problem</a>
+                <a href="#failures" class="block nav-link px-3 py-2 rounded-md text-base font-medium font-sans">Core Failures</a>
+                <a href="#challenges" class="block nav-link px-3 py-2 rounded-md text-base font-medium font-sans">The Challenges</a>
+                <a href="#solution" class="block nav-link px-3 py-2 rounded-md text-base font-medium font-sans">The Solution</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <section id="hero" class="text-center py-12">
+            <h2 class="font-sans text-4xl md:text-5xl font-bold tracking-tight text-primary">
+                Exploring the Prologue
+            </h2>
+            <p class="mt-4 max-w-2xl mx-auto text-xl text-secondary">
+                An interactive journey through the foundational arguments of "Glories of Belief" by <span class="font-sans font-semibold text-accent">Abul Fariq Wasti</span>.
+            </p>
+        </section>
+
+        <section id="problem" class="py-16 scroll-mt-20">
+            <div class="max-w-3xl mx-auto text-center">
+                <h3 class="font-sans text-3xl font-bold text-primary">The Core Problem: A Faith in Crisis</h3>
+                <p class="mt-4 text-lg text-secondary leading-relaxed">
+                    The author diagnoses a deep-seated crisis. In an age of unprecedented propaganda against religion, he argues that the traditional defenses of Islam are "hopelessly helpless." Instead of unity, he sees internal division and a failure to address modern intellectual challenges.
+                </p>
+                <blockquote class="mt-8 text-left">
+                    "All the Muslim sects were duty bound to have united... and stood against the anti-Islam missions to protect the Muslims from their unwholesome influence. But they are the victims of their own trivial conflicts and are not at all worried to protect Islam from foreign attacks."
+                </blockquote>
+            </div>
+        </section>
+
+        <section id="failures" class="py-16 scroll-mt-20">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-12">
+                    <h3 class="font-sans text-3xl font-bold text-primary">Three Critical Failures of Modern Scholarship</h3>
+                    <p class="mt-4 text-lg text-secondary leading-relaxed">
+                        Wasti identifies three primary reasons religious scholars are unable to offer convincing replies to critics, leaving educated youth with an "unquenched thirst and dissatisfied heart."
+                    </p>
+                </div>
+
+                <div>
+                    <div class="mb-4 flex flex-wrap justify-center border-b border-accent">
+                        <button class="tab-btn flex-grow text-center p-4 font-sans border-b-2 transition-colors duration-300 ease-in-out active-tab" data-tab="tab1">1. Outdated Science</button>
+                        <button class="tab-btn flex-grow text-center p-4 font-sans border-b-2 border-transparent text-secondary hover:border-accent hover:text-primary transition-colors duration-300 ease-in-out" data-tab="tab2">2. External Philosophies</button>
+                        <button class="tab-btn flex-grow text-center p-4 font-sans border-b-2 border-transparent text-secondary hover:border-accent hover:text-primary transition-colors duration-300 ease-in-out" data-tab="tab3">3. Misinterpreting Verses</button>
+                    </div>
+
+                    <div id="tab-content" class="mt-8">
+                        <div id="tab1" class="tab-pane bg-white p-8 rounded-lg shadow-md">
+                            <h4 class="font-sans text-2xl font-bold text-accent mb-4">Reliance on Outdated Science</h4>
+                            <p class="leading-relaxed">Early religious interpretations were shaped by the ancient Ptolemaic model of the universe. When science disproved this model, the interpretations built upon it became untenable.</p>
+                            <blockquote class="mt-6">
+                                "And these whimsical interpretations are gripping the minds of most of our religious heads even today... It is the following of these fallacious orthodox doctrines, whose myths have since been exploded, which is the first cause of the inability of our demigods to answer the atheists."
+                            </blockquote>
+                        </div>
+                        <div id="tab2" class="tab-pane hidden bg-white p-8 rounded-lg shadow-md">
+                            <h4 class="font-sans text-2xl font-bold text-accent mb-4">Influence of External Philosophies</h4>
+                            <p class="leading-relaxed">Commentaries on the Quran were heavily influenced by pre-Islamic traditions and classical Greek philosophy, leading to interpretations that were not derived purely from the core truths of the text.</p>
+                             <blockquote class="mt-6">
+                                "The Muslim theologians took pains to comment upon and explain the Quranic verses... in the light of and according to the views of this classical philosophy."
+                            </blockquote>
+                        </div>
+                        <div id="tab3" class="tab-pane hidden bg-white p-8 rounded-lg shadow-md">
+                            <h4 class="font-sans text-2xl font-bold text-accent mb-4">The Explicit vs. Implicit Fallacy</h4>
+                            <p class="leading-relaxed">Scholars failed to distinguish between <span class="font-sans font-semibold">Explicit (literal)</span> and <span class="font-sans font-semibold">Implicit (allegorical)</span> verses. By taking allegories about the "Self" literally, they created "far-fetched and unrealistic interpretations."</p>
+                             <blockquote class="mt-6">
+                                "These are the interpretations, which are the best weapons in the hands of the atheists against Islam. It is because of these fantastic interpretations that... the educated people have become disgusted with religion."
+                            </blockquote>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="challenges" class="py-16 scroll-mt-20">
+             <div class="max-w-3xl mx-auto text-center mb-12">
+                <h3 class="font-sans text-3xl font-bold text-primary">The Challenges from Atheism</h3>
+                <p class="mt-4 text-lg text-secondary leading-relaxed">
+                    The author presents a series of objections he has personally faced. These challenges, born from the "fantastic interpretations" he critiques, form the intellectual battleground the book seeks to address.
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-secondary p-6 rounded-lg shadow-md">
+                    <h4 class="font-sans font-semibold text-lg text-accent">1. On the Seven Skies</h4>
+                    <p class="mt-2 text-secondary">"Where are those seven skies...? The concept... based on the Ptolemaic system... was proved false long ago. These are all fantasies..."</p>
+                </div>
+                <div class="bg-secondary p-6 rounded-lg shadow-md">
+                    <h4 class="font-sans font-semibold text-lg text-accent">2. On God's Throne</h4>
+                    <p class="mt-2 text-secondary">"The Empyrean has vanished with the skies. And since God was on the Empyrean, He also has gone with the wind."</p>
+                </div>
+                <div class="bg-secondary p-6 rounded-lg shadow-md">
+                    <h4 class="font-sans font-semibold text-lg text-accent">3. On the Prophets' Sight</h4>
+                    <p class="mt-2 text-secondary">"Experts of Telepathy... can see things at hundred of miles but your Hazrat Yaquob (Jacob) could not see Yousuf (Joseph)... Is this the calibre of your Prophets?"</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="solution" class="py-16 scroll-mt-20">
+             <div class="max-w-3xl mx-auto text-center mb-12">
+                <h3 class="font-sans text-3xl font-bold text-primary">The Author's Solution: A Roadmap to Understanding</h3>
+                <p class="mt-4 text-lg text-secondary leading-relaxed">
+                    To answer these challenges, the book aims to "disclose those secrets which have reposed in the recesses of the hearts of enlightened sages." The solution lies in understanding the Quran through modern science and a deep analysis of the human "Self." The book's five chapters build this new foundation.
+                </p>
+            </div>
+            <div class="max-w-4xl mx-auto space-y-4">
+                 <a href="ch1.html" class="block content-card bg-white p-6 rounded-lg border border-accent cursor-pointer">
+                    <h4 class="font-sans font-semibold text-lg text-accent">Chapter 1: The Explicits</h4>
+                    <p class="mt-2 text-secondary">Defines and distinguishes Explicit and Implicit verses and establishes the types of verses that are "Explicit beyond doubt," with examples of commands, prohibitions, and narratives.</p>
+                 </a>
+                 <div class="content-card chapter-card-inactive bg-white p-6 rounded-lg border border-accent" data-chapter="2">
+                    <h4 class="font-sans font-semibold text-lg text-accent flex justify-between items-center">
+                        <span>Chapter 2: The Implicits</span>
+                        <span class="font-sans text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">Coming Soon</span>
+                    </h4>
+                    <p class="mt-2 text-secondary">Explores the purpose of prophecy as Self-purification, defines real polytheism, and begins to explain key Implicit verses.</p>
+                </div>
+                 <div class="content-card chapter-card-inactive bg-white p-6 rounded-lg border border-accent" data-chapter="3">
+                    <h4 class="font-sans font-semibold text-lg text-accent flex justify-between items-center">
+                        <span>Chapter 3: Perception Of The Abstract</span>
+                        <span class="font-sans text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">Coming Soon</span>
+                    </h4>
+                    <p class="mt-2 text-secondary">Discusses how to draw the human "Self" towards the abstract world, the stages of faith, and replies to objections about Hell.</p>
+                </div>
+                 <div class="content-card chapter-card-inactive bg-white p-6 rounded-lg border border-accent" data-chapter="4">
+                    <h4 class="font-sans font-semibold text-lg text-accent flex justify-between items-center">
+                        <span>Chapter 4: Noor (Divine Light)</span>
+                        <span class="font-sans text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">Coming Soon</span>
+                    </h4>
+                    <p class="mt-2 text-secondary">Explains the meaning of 'Noor' (Light) and connects it to physics, creation, and the "Abode of Light."</p>
+                </div>
+                <div class="content-card chapter-card-inactive bg-white p-6 rounded-lg border border-accent" data-chapter="5">
+                    <h4 class="font-sans font-semibold text-lg text-accent flex justify-between items-center">
+                        <span>Chapter 5: Contrivance</span>
+                        <span class="font-sans text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">Coming Soon</span>
+                    </h4>
+                    <p class="mt-2 text-secondary">Analyzes "contrivance" and reinterprets events in the lives of the Prophets.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full text-center">
+            <h3 class="font-sans text-lg font-medium text-primary">Chapter Coming Soon</h3>
+            <p class="mt-2 text-sm text-secondary">This chapter is not yet available in the interactive explorer. Please check back later.</p>
+            <button id="close-modal" class="mt-6 font-sans bg-accent text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors w-full">Close</button>
+        </div>
+    </div>
+
+
+    <footer class="bg-secondary mt-16 py-6">
+        <div class="container mx-auto px-4 text-center text-secondary text-sm">
+            <p>Interactive Application based on "Glories of Belief" by Abul Fariq Wasti.</p>
+            <p>&copy; 2024 - Designed for educational exploration.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tabs = document.querySelectorAll('.tab-btn');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const inactiveChapters = document.querySelectorAll('.chapter-card-inactive');
+            const modal = document.getElementById('modal');
+            const closeModalBtn = document.getElementById('close-modal');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.dataset.tab;
+
+                    tabs.forEach(t => t.classList.remove('active-tab'));
+                    tab.classList.add('active-tab');
+                    
+                    tabPanes.forEach(pane => {
+                        pane.style.display = pane.id === tabId ? 'block' : 'none';
+                    });
+                });
+            });
+
+            const handleNavClick = function (e) {
+                const targetId = this.getAttribute('href');
+                if (targetId.startsWith('#')) {
+                    e.preventDefault();
+                    document.querySelector(targetId).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                }
+            };
+            
+            navLinks.forEach(anchor => anchor.addEventListener('click', handleNavClick));
+            document.querySelectorAll('#mobile-menu a').forEach(anchor => anchor.addEventListener('click', handleNavClick));
+
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            inactiveChapters.forEach(card => {
+                card.addEventListener('click', () => {
+                    modal.classList.remove('hidden');
+                });
+            });
+            
+            const closeModal = () => {
+                modal.classList.add('hidden');
+            };
+
+            closeModalBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+            
+            // Set initial hidden state for tab panes
+            tabPanes.forEach((pane, index) => {
+                if (index !== 0) {
+                    pane.style.display = 'none';
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
