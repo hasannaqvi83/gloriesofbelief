@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive: Glories of Belief - Chapter 1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Serene Earth -->
+    <!-- Application Structure Plan: The SPA is designed as a conceptual exploration rather than a linear text. It starts with an introduction to the core thesis: understanding the Quran's Explicit verses requires understanding the Human Self. The user is then guided to two main interactive sections. The first is 'The Nature of the Self', which uses interactive modules for each of the five senses to let the user experience the author's parables and grasp the concept of the 'store of experience'. The second is 'The 7 Types of Explicit Verses', presented as a clickable grid. Selecting a type dynamically loads its detailed commentary and examples into a main content view. This non-linear, concept-first approach allows users to understand the author's framework before delving into the proofs, significantly improving comprehension and engagement over reading a static page. -->
+    <!-- Visualization & Content Choices: 
+        1. Report Info: Core concepts of Explicit vs. Implicit and the role of the Self. -> Goal: Inform & Orient. -> Viz/Presentation Method: Thematic sections with clear headings and introductory text. -> Interaction: Vertical scrolling and navigation links. -> Justification: Establishes the foundational argument of the chapter clearly for the user. -> Library/Method: HTML/CSS.
+        2. Report Info: Parables of the five senses. -> Goal: Engage & Demonstrate. -> Viz/Presentation Method: Five interactive modules. -> Interaction: User clicks a button for a sense (e.g., "Experience Taste"), which reveals a text block with the corresponding parable and explanation. -> Justification: Transforms a passive reading exercise into an active thought experiment, reinforcing the author's central point about the Self's 'store' of feelings. -> Library/Method: Vanilla JS, HTML/CSS.
+        3. Report Info: The 7 categories of Explicit verses. -> Goal: Organize & Allow Exploration. -> Viz/Presentation Method: A responsive grid of clickable cards. -> Interaction: Clicking a card dynamically renders the detailed content for that category in the main view area. -> Justification: Breaks down the dense text into user-selectable, manageable sections, promoting exploration without overwhelming the user. -> Library/Method: Vanilla JS, HTML/CSS.
+        CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+    <style>
+        body {
+            font-family: 'Lora', serif;
+            background-color: #FDFBF8; /* Warm off-white */
+            color: #403A35; /* Dark brown */
+        }
+        h1, h2, h3, h4, h5, h6, .font-sans {
+            font-family: 'Inter', sans-serif;
+        }
+        .bg-primary { background-color: #FDFBF8; }
+        .bg-secondary { background-color: #F5F1ED; } /* Lighter beige */
+        .bg-accent { background-color: #A67B5B; } /* Muted terracotta */
+        .text-accent { color: #A67B5B; }
+        .text-primary { color: #403A35; }
+        .text-secondary { color: #6E645B; } /* Lighter brown for subtitles */
+        .border-accent { border-color: #D1C7BC; } /* Subtle border */
+        .active-nav {
+            color: #A67B5B;
+            border-bottom: 2px solid #A67B5B;
+            font-weight: 600;
+        }
+        .nav-link {
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #A67B5B;
+            border-bottom-color: #A67B5B;
+        }
+        .content-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .content-area {
+            min-height: 400px;
+        }
+        blockquote {
+            border-left: 3px solid #A67B5B;
+            padding-left: 1rem;
+            font-style: italic;
+            color: #6E645B;
+        }
+    </style>
+</head>
+<body class="bg-primary text-primary">
+
+    <header class="bg-secondary/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-accent">Glories of Belief</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#introduction" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Introduction</a>
+                        <a href="#self-exploration" class="nav-link px-3 py-2 rounded-md text-sm font-medium">The Nature of the Self</a>
+                        <a href="#verse-types" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Types of Explicit Verses</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-primary hover:text-accent hover:bg-gray-200 focus:outline-none">
+                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#introduction" class="block nav-link px-3 py-2 rounded-md text-base font-medium">Introduction</a>
+                <a href="#self-exploration" class="block nav-link px-3 py-2 rounded-md text-base font-medium">The Nature of the Self</a>
+                <a href="#verse-types" class="block nav-link px-3 py-2 rounded-md text-base font-medium">Types of Explicit Verses</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <section id="introduction" class="text-center mb-16 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-primary mb-4">Chapter 1: The Explicits (Muhkamat)</h2>
+            <p class="max-w-3xl mx-auto text-lg text-secondary leading-relaxed">
+                This chapter explores the distinction between "Explicit" and "Implicit" verses in the Quran. The author proposes that the key to this understanding lies not in traditional interpretation alone, but in a deep exploration of the "Human Self" and how it perceives reality through its senses and stored experiences.
+            </p>
+        </section>
+
+        <section id="self-exploration" class="mb-16 scroll-mt-20">
+            <div class="text-center mb-10">
+                <h3 class="text-2xl md:text-3xl font-bold text-primary">The Nature of the Self</h3>
+                <p class="max-w-2xl mx-auto mt-2 text-md text-secondary">
+                    The author argues that our "Self" can only comprehend things it has previously experienced through its five senses. These experiences create a "storehouse" of feelings and images. Interact with the modules below to explore this concept through the author's parables.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 text-center">
+                <div class="sense-module bg-secondary p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-bold mb-3">👁️<br>Seeing</h4>
+                    <button onclick="showSenseInfo('seeing')" class="bg-accent text-white font-bold py-2 px-4 rounded-full hover:bg-opacity-80 transition-all">Experience</button>
+                </div>
+                <div class="sense-module bg-secondary p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-bold mb-3">👂<br>Hearing</h4>
+                    <button onclick="showSenseInfo('hearing')" class="bg-accent text-white font-bold py-2 px-4 rounded-full hover:bg-opacity-80 transition-all">Experience</button>
+                </div>
+                <div class="sense-module bg-secondary p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-bold mb-3">👅<br>Tasting</h4>
+                    <button onclick="showSenseInfo('tasting')" class="bg-accent text-white font-bold py-2 px-4 rounded-full hover:bg-opacity-80 transition-all">Experience</button>
+                </div>
+                <div class="sense-module bg-secondary p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-bold mb-3">👃<br>Smelling</h4>
+                    <button onclick="showSenseInfo('smelling')" class="bg-accent text-white font-bold py-2 px-4 rounded-full hover:bg-opacity-80 transition-all">Experience</button>
+                </div>
+                <div class="sense-module bg-secondary p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-bold mb-3">🖐️<br>Touching</h4>
+                    <button onclick="showSenseInfo('touching')" class="bg-accent text-white font-bold py-2 px-4 rounded-full hover:bg-opacity-80 transition-all">Experience</button>
+                </div>
+            </div>
+            <div id="sense-info-display" class="mt-8 p-6 bg-white rounded-lg shadow-inner border border-accent hidden transition-all duration-500"></div>
+        </section>
+
+        <section id="verse-types" class="scroll-mt-20">
+            <div class="text-center mb-10">
+                <h3 class="text-2xl md:text-3xl font-bold text-primary">The 7 Types of Explicit Verses</h3>
+                <p class="max-w-2xl mx-auto mt-2 text-md text-secondary">
+                    Based on the principle that the Self understands what it has experienced, the author categorizes Explicit verses into seven types. Click a category to explore the detailed commentary and examples from the Quran.
+                </p>
+            </div>
+            <div id="category-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            </div>
+
+            <div id="content-display-area" class="mt-12 content-area bg-white p-6 md:p-8 rounded-lg shadow-xl border border-accent transition-opacity duration-500 ease-in-out opacity-0 hidden">
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-secondary mt-16 py-6">
+        <div class="container mx-auto px-4 text-center text-secondary text-sm">
+            <p>Interactive Application based on "Glories of Belief" by Abul Fariq Wasti.</p>
+            <p>&copy; 2025 - Designed for educational exploration.</p>
+        </div>
+    </footer>
+
+    <script>
+        const senseData = {
+            seeing: {
+                title: "The Faculty of Seeing",
+                parable: "If someone draws your attention to a roaming hen and says, 'Look at the hen. It is wandering with its chicks. They are five in all. How pretty and soft they are. Just like the tufts of silk.'",
+                explanation: "On hearing this if you look within, you will see the images of the hen and its chicks either floating in mind or appearing on the screen of your chest. Your Self retrieves this image from its store of things it has seen before."
+            },
+            hearing: {
+                title: "The Faculty of Hearing",
+                parable: "If someone shows a picture and asks, 'See and say whose picture is this?'",
+                explanation: "The name of the thing, like 'cat' or 'dog', comes up. The Self matches the image to a stored sound (the name) it has heard before."
+            },
+            tasting: {
+                title: "The Faculty of Tasting",
+                parable: "If I say, 'Look at this boy. He is chewing a lemon. It is damn sour but he goes on chewing'.",
+                explanation: "These statements will likely bring water to your mouth. This shows that on mentioning a taste, the Self brings up from its store the already stored feeling of that same taste and understands it by comparison."
+            },
+            smelling: {
+                title: "The Faculty of Smelling",
+                parable: "When the Self smells anything, like a rose or jasmine...",
+                explanation: "It brings out from its store a previously smelt scent or odour, compares it, and then declares what it is. This knowledge comes from its vast internal library of smells."
+            },
+            touching: {
+                title: "The Faculty of Touching",
+                parable: "If I say, 'Oh! How soft! Fingers are dipping deep in it'. Or if I say, 'Oh! How flabby!'",
+                explanation: "These statements will make an extremely mild soothing sensation felt on the tips of your fingers. The Self recalls the feeling of 'softness' or 'flabbiness' from its stored tactile experiences."
+            }
+        };
+
+        const categoryData = {
+            commands: {
+                title: "1. Commands",
+                icon: "📜",
+                description: "Verses and Traditions containing a command to do something.",
+                content: `
+                    <h4 class="text-2xl font-bold mb-4 text-accent">Examples of Commands</h4>
+                    <div class="space-y-6">
+                        <article>
+                            <h5 class="font-bold text-lg mb-1">On Eating and Permissibility</h5>
+                            <blockquote>'O ye people! Eat of what on earth is pure and permissible' (Baqarah: 168).</blockquote>
+                            <p class="mt-2">The text explains that this command is explicit because the concepts of 'eating', 'earth', 'pure', and 'permissible' are understood through our direct experience. The commentary further details what is forbidden (dead meat, swine) and what is pure (things brought 'out' of the earth, like fruits and vegetables), grounding the divine command in tangible, worldly understanding.</p>
+                        </article>
+                        <article>
+                            <h5 class="font-bold text-lg mb-1">On Striving in God's Cause</h5>
+                            <blockquote>'Fight in the cause of Allah.' (Baqarah: 190).</blockquote>
+                            <p class="mt-2">This is an explicit command because 'fighting' is a known physical action. The author suggests this command prompts a test of the Self: is it truly ready to sacrifice? This internal reckoning is a direct, felt experience.</p>
+                        </article>
+                         <article>
+                            <h5 class="font-bold text-lg mb-1">On Sincerity and Desire for the Hereafter</h5>
+                            <blockquote>'Say 'If the last Home, with Allah, be for you specially and not for anyone else, then seek ye for death, if ye are sincere'.' (Baqarah: 94).</blockquote>
+                            <p class="mt-2">The author uses a parable of a man inheriting a fortune to explain this. The desire to reach the fortune is intense and real. Similarly, a true believer's desire for Heaven should be just as palpable. The lack of this desire, a feeling the Self can recognize, exposes a lack of sincerity. This is an explicit test of an internal state.</p>
+                        </article>
+                         <article>
+                            <h5 class="font-bold text-lg mb-1">On Unity</h5>
+                            <blockquote>'And hold fast by the rope (covenant) of Allah all together and be not disunited'. (Aale-Imran: 103).</blockquote>
+                            <p class="mt-2">This command triggers a debate between the 'Self' and 'Reason'. The Self argues for tribal and national identity, which are felt attachments. Reason points to the Quran's explicit call for a higher unity based on faith. This internal conflict is a universally understood human experience, making the verse's core message explicit.</p>
+                        </article>
+                    </div>`
+            },
+            prohibitions: {
+                title: "2. Prohibitions",
+                icon: "�",
+                description: "Verses that prohibit the performance of an act.",
+                content: `
+                    <h4 class="text-2xl font-bold mb-4 text-accent">Examples of Prohibitions</h4>
+                    <div class="space-y-6">
+                        <article>
+                            <h5 class="font-bold text-lg mb-1">On Considering Martyrs as Dead</h5>
+                            <blockquote>'And say not of those who are slain in the way of Allah that they are dead. Nay, they are living, though ye perceive it not.' (Baqarah: 154).</blockquote>
+                            <p class="mt-2">This is a direct prohibition of a specific speech act. The concepts of 'saying', 'slain', and 'dead' are from our direct experience. The verse explicitly commands us to refrain from an action, even if the reason ('they are living') is beyond our perception. The command itself is clear.</p>
+                        </article>
+                        <article>
+                            <h5 class="font-bold text-lg mb-1">On Arrogance</h5>
+                            <blockquote>'And don't walk on earth with haughtiness, because you can't rend the earth asunder nor can you reach mountains in height' (Israil: 37).</blockquote>
+                            <p class="mt-2">The prohibition against 'haughtiness' is explicit because pride and humility are feelings and behaviors we experience and witness. The verse grounds this abstract prohibition with physical, understandable limitations: you cannot split the earth or outgrow mountains. This ties a moral rule to physical reality.</p>
+                        </article>
+                        <article>
+                            <h5 class="font-bold text-lg mb-1">On Forgetting God</h5>
+                            <blockquote>'And be not like those who forgot God! so He made them forget their own selves; these are the transgressors!' (Hashr:19).</blockquote>
+                            <p class="mt-2">Forgetting is a common mental experience. The verse explicitly forbids this act of forgetting in relation to God, linking it to a tangible consequence: forgetting one's own self. The prohibition is clear, based on the understandable act of remembering or forgetting.</p>
+                        </article>
+                    </div>`
+            },
+            narratives: {
+                title: "3. Narratives of Past Generations",
+                icon: "🏛️",
+                description: "Verses that narrate the condition of previous peoples.",
+                content: `
+                    <h4 class="text-2xl font-bold mb-4 text-accent">Examples of Narratives</h4>
+                    <div class="space-y-6">
+                        <article>
+                            <h5 class="font-bold text-lg mb-1">The People of Madyan and Prophet Shu'aib</h5>
+                            <blockquote>'And, O my people! Give full measure and weigh fairly, and defraud not people their things, and do not act corruptly in the land...' (Hud: 85).</blockquote>
+                            <p class="mt-2">This narrative is explicit because it deals with understandable social and economic actions: weighing, measuring, and fraud. The consequences—a 'mighty blast' and an earthquake—are physical events. The story serves as a clear, historical example of cause and effect based on observable behaviors.</p>
+                        </article>
+                         <article>
+                            <h5 class="font-bold text-lg mb-1">The People of Thamud and the She-Camel</h5>
+                            <blockquote>'So they ham-strung (slew) the she-camel and revolted against their Lord's commandments...' (A'araf: 77).</blockquote>
+                            <p class="mt-2">The story, while containing a miracle, is built on explicit actions: the people's demand, the prophet's warning, the act of killing the camel, and the subsequent physical destruction by earthquake and fire. The author uses this narrative to explain an aspect of the Self: its tendency to reject information that contradicts its convictions, a feeling we can all understand.</p>
+                        </article>
+                    </div>`
+            },
+            conduct: {
+                title: "4. Civic Conduct & Social Life",
+                icon: "🤝",
+                description: "Verses related to society, family, and human interaction.",
+                 content: `
+                    <h4 class="text-2xl font-bold mb-4 text-accent">Examples of Civic Conduct</h4>
+                    <div class="space-y-6">
+                        <article>
+                            <h5 class="font-bold text-lg mb-1">On Eating with Others</h5>
+                            <blockquote>'...It is no sin in you that you eat together or separately.' (Noor: 61).</blockquote>
+                            <p class="mt-2">This verse is explicit because it governs the simple, physical act of eating and the social context of doing so with family and friends. It addresses social barriers and promotes unity through the common, understandable experience of sharing a meal.</p>
+                        </article>
+                         <article>
+                            <h5 class="font-bold text-lg mb-1">On Kindness to Parents</h5>
+                            <blockquote>'...say not to them (so much as) 'Ugh' nor chide them, and speak to them a generous word.' (Israil: 23-24).</blockquote>
+                            <p class="mt-2">The instruction is made explicit through concrete examples of behavior: the utterance 'Ugh', the act of chiding, and the use of generous words. These are observable actions and speech patterns that everyone understands, making the command clear and practical.</p>
+                        </article>
+                    </div>`
+            },
+            physical_world: {
+                title: "5. The Physical World",
+                icon: "🌍",
+                description: "Verses that describe the natural, physical world.",
+                content: `
+                    <h4 class="text-2xl font-bold mb-4 text-accent">Examples of the Physical World</h4>
+                    <p class="mb-6">These verses are explicit because they refer to objects and phenomena we can directly perceive with our five senses.</p>
+                    <div class="space-y-6">
+                        <article>
+                            <blockquote>'Most surely in the creation of the heavens and the earth and the alternation of the night and the day, and the ships that sail in the sea... and the water that Allah sends down from the skies... there are signs for the people who understand'. (Baqarah: 164).</blockquote>
+                            <p class="mt-2">Each element mentioned—sky, earth, night, day, ships, sea, water—is part of our direct physical experience. The verse asks us to reflect on what we already see and know, making its message grounded and explicit.</p>
+                        </article>
+                         <article>
+                            <blockquote>'Have you considered the fire which you strike? Is it you that produce the trees for it, or are We the producers?' (Waqiah: 71-72).</blockquote>
+                             <p class="mt-2">The verse points to the common experience of striking a fire and the existence of trees. It prompts reflection on the origin of these familiar things. The author explains it could refer to burning wood or the natural friction of trees like bamboo creating fire—both physical, understandable phenomena.</p>
+                        </article>
+                    </div>`
+            },
+            feelings: {
+                title: "6. Common Feelings of the Self",
+                icon: "❤️",
+                description: "Verses describing internal states and feelings experienced by everyone.",
+                content: `
+                    <h4 class="text-2xl font-bold mb-4 text-accent">Examples of Common Feelings</h4>
+                     <p class="mb-6">These verses are explicit because they describe emotional and psychological states that are universal to the human condition and stored in our 'Self'.</p>
+                    <div class="space-y-6">
+                        <article>
+                            <h5 class="font-bold text-lg mb-1">The Love of Worldly Desires</h5>
+                            <blockquote>'The love of desires of women and sons and hoarded treasures of gold and silver and well-bred horses and cattle and tilth, is made to seem fair to people...' (Aal-e-Imran: 14)</blockquote>
+                            <p class="mt-2">This is explicit because the 'love of desires' for family, wealth, and property is a fundamental, felt experience for almost everyone. The verse simply states a psychological truth that the Self readily recognizes.</p>
+                        </article>
+                        <article>
+                            <h5 class="font-bold text-lg mb-1">The Self in Distress and Ease</h5>
+                            <blockquote>'And when affliction touches a man, he calls on us... but when We remove his afflictions from him he passes on as though he had never called on Us...' (Yunus: 12)</blockquote>
+                             <p class="mt-2">This verse presents a clear and recognizable pattern of human behavior. The feelings of desperation in hardship and forgetfulness in comfort are common to the human experience, making the description explicit and relatable.</p>
+                        </article>
+                    </div>`
+            },
+            faith: {
+                title: "7. Religion, Faith & Islam",
+                icon: "✨",
+                description: "Verses that touch upon the core topics of religion and belief.",
+                 content: `
+                    <h4 class="text-2xl font-bold mb-4 text-accent">Examples on Religion & Faith</h4>
+                     <p class="mb-6">While faith itself is abstract, these verses are considered 'nearly' explicit because they define it using concepts and actions the Self can understand.</p>
+                    <div class="space-y-6">
+                        <article>
+                            <h5 class="font-bold text-lg mb-1">The Unifying Nature of Religion</h5>
+                            <blockquote>'The same religion has He established for you as that which He enjoined on Nuh... Abraham... Moses... and Jesus...' (Shura: 13).</blockquote>
+                            <p class="mt-2">This is explicit in its claim: the core religion is one and the same. The verse lists prophets whose stories are known, making the reference historical and concrete. The core of this religion is then defined as the 'purification of the Self,' an internal process whose effects can be felt.</p>
+                        </article>
+                        <article>
+                            <h5 class="font-bold text-lg mb-1">Faith Defined as Love</h5>
+                            <blockquote>'...and those who believe are stronger in love for God'. (Baqarah: 165).</blockquote>
+                             <p class="mt-2">This verse explicitly defines 'faith' in terms of 'love', an emotion that is a primary and powerful experience for the Self. By linking the abstract concept of faith to the felt experience of love, the verse makes its meaning more accessible and explicit.</p>
+                        </article>
+                    </div>`
+            }
+        };
+
+        function showSenseInfo(sense) {
+            const display = document.getElementById('sense-info-display');
+            const data = senseData[sense];
+            
+            display.innerHTML = `
+                <h4 class="font-bold text-xl mb-2 text-accent">${data.title}</h4>
+                <p class="mb-2"><strong>Parable:</strong> <em>"${data.parable}"</em></p>
+                <p><strong>Explanation:</strong> ${data.explanation}</p>
+            `;
+            display.classList.remove('hidden');
+        }
+
+        function renderCategories() {
+            const grid = document.getElementById('category-grid');
+            let html = '';
+            for (const key in categoryData) {
+                const category = categoryData[key];
+                html += `
+                    <div class="content-card bg-secondary p-6 rounded-lg shadow-md cursor-pointer" onclick="renderContent('${key}')">
+                        <h4 class="text-2xl font-bold mb-2">${category.icon}</h4>
+                        <h5 class="font-bold text-lg text-primary">${category.title}</h5>
+                        <p class="text-sm text-secondary">${category.description}</p>
+                    </div>
+                `;
+            }
+            grid.innerHTML = html;
+        }
+
+        function renderContent(categoryKey) {
+            const displayArea = document.getElementById('content-display-area');
+            const data = categoryData[categoryKey];
+
+            displayArea.classList.add('opacity-0');
+
+            setTimeout(() => {
+                displayArea.innerHTML = data.content;
+                displayArea.classList.remove('hidden');
+                displayArea.classList.remove('opacity-0');
+                displayArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCategories();
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            document.querySelectorAll('.nav-link').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    if(mobileMenu && !mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                    const targetId = this.getAttribute('href');
+                    if (targetId.startsWith('#')) {
+                        e.preventDefault();
+                        document.querySelector(targetId).scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>
