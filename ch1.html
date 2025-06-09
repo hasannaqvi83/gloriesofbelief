@@ -382,6 +382,9 @@
                 <p><strong>Explanation:</strong> ${data.explanation}</p>
             `;
             display.classList.remove('hidden');
+            setTimeout(() => {
+                display.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300);            
         }
 
         function renderCategories() {
